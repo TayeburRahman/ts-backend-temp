@@ -73,6 +73,7 @@ const registrationAccount = async (payload: IAuth) => {
   };
 
   if (role === "USER" || role === "PARTNER") {
+    console.log("==============",auth);
     sendEmail({
       email: auth.email,
       subject: "Activate Your Account",
@@ -93,6 +94,8 @@ const registrationAccount = async (payload: IAuth) => {
 
   other.authId = createAuth._id;
   other.email = email;
+
+  console.log("Account", auth)
 
   // Role-based user creation
   let result;
@@ -193,7 +196,8 @@ const loginAccount = async (payload: LoginPayload) => {
   const { _id: authId } = isAuth;
   let userDetails : any;
   let role;
-
+  
+  console.log("role", role)
   switch (isAuth.role) {
     case ENUM_USER_ROLE.USER:
       userDetails = await User.findOne({ authId: isAuth._id }).populate("authId");

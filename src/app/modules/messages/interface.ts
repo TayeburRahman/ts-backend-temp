@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
-import { IUser } from '../auth/auth.interface';
+import { IAuth } from '../auth/auth.interface';
+ 
 
 export type IConversation = {
   participants: Types.ObjectId[];
@@ -9,8 +10,8 @@ export type IConversation = {
   externalModelType: string;
 };
 export type IMessage = {
-  senderId: Types.ObjectId | IUser;
-  receiverId: Types.ObjectId | IUser;
+  senderId: Types.ObjectId | IAuth;
+  receiverId: Types.ObjectId | IAuth;
   conversationId: Types.ObjectId | IConversation;
   message_img: string;
   message: string;

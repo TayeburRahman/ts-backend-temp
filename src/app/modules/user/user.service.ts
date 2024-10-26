@@ -8,11 +8,7 @@ import { IUser } from "./user.interface";
 import User from "./user.model";
 
  
-
-interface DeleteAccountPayload {
-  email: string;
-  password: string;
-}
+ 
 
 const updateProfile = async (req: RequestData): Promise<IUser> => {
   const { files, body: data } = req;
@@ -78,7 +74,7 @@ const getProfile = async (user: { userId: string }): Promise<IUser> => {
   return result;
 };
 
-const deleteMyAccount = async (payload: DeleteAccountPayload): Promise<void> => {
+const deleteMyAccount = async (payload: { email: string; password: string; }): Promise<void> => {
   const { email, password } = payload;
 
   const isUserExist = await Auth.isAuthExist(email);
