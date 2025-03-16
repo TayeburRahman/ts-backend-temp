@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-unused-vars */ 
+/* eslint-disable no-unused-vars */
 import { Document, Model } from 'mongoose';
 export type IEmailOptions = {
   email: string;
@@ -49,7 +49,7 @@ export type IAuth = Document & {
   is_block?: boolean;
   isActive?: boolean;
   confirmPassword: string;
-  [key: string]: any; 
+  [key: string]: any;
 };
 
 export interface IAuthModel extends Model<IAuth> {
@@ -66,4 +66,19 @@ export interface ActivationPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }

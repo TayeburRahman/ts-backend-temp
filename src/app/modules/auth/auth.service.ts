@@ -2,38 +2,22 @@ import bcrypt from "bcrypt";
 import cron from "node-cron";
 import httpStatus from "http-status";
 
-import ApiError from "../../../errors/ApiError"; 
-import { jwtHelpers } from "../../../helpers/jwtHelpers";   
+import ApiError from "../../../errors/ApiError";
+import { jwtHelpers } from "../../../helpers/jwtHelpers";
 import { logger } from "../../../shared/logger";
-import Auth from "./auth.model"; 
-import Partner from "../partner/partner.model"; 
- 
+import Auth from "./auth.model";
+import Partner from "../partner/partner.model";
+
 import sendEmail from "../../../utils/sendEmail";
 import { ENUM_USER_ROLE } from "../../../enums/user";
 import { sendResetEmail } from "./sendResetMails";
 import { createActivationToken } from "../../../utils/createActivationToken";
-import { registrationSuccessEmailBody } from "../../../mails/user.register";  
+import { registrationSuccessEmailBody } from "../../../mails/user.register";
 import { resetEmailTemplate } from "../../../mails/reset.email";
-import { ActivationPayload, IAuth, LoginPayload } from "./auth.interface";
+import { ActivationPayload, ChangePasswordPayload, ForgotPasswordPayload, IAuth, LoginPayload, ResetPasswordPayload } from "./auth.interface";
 import config from "../../../config";
 import User from "../user/user.model";
 import Admin from "../admin/admin.model";
-
-
-interface ForgotPasswordPayload {
-  email: string;
-}
-
-interface ResetPasswordPayload {
-  newPassword: string;
-  confirmPassword: string;
-}
-
-interface ChangePasswordPayload {
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
 
 const registrationAccount = async (payload: IAuth) => {
   const { role, password, confirmPassword, email, ...other } = payload;
@@ -73,7 +57,7 @@ const registrationAccount = async (payload: IAuth) => {
   };
 
   if (role === "USER" || role === "PARTNER") {
-    console.log("==============",auth);
+    console.log("==============", auth);
     sendEmail({
       email: auth.email,
       subject: "Activate Your Account",
@@ -194,9 +178,9 @@ const loginAccount = async (payload: LoginPayload) => {
   }
 
   const { _id: authId } = isAuth;
-  let userDetails : any;
+  let userDetails: any;
   let role;
-  
+
   console.log("role", role)
   switch (isAuth.role) {
     case ENUM_USER_ROLE.USER:
@@ -241,7 +225,7 @@ const loginAccount = async (payload: LoginPayload) => {
   };
 };
 
-const forgotPass = async (payload: { email: string}) => {
+const forgotPass = async (payload: { email: string }) => {
   const user = await Auth.findOne(
     { email: payload.email },
     { _id: 1, role: 1, email: 1, name: 1 }
@@ -270,14 +254,14 @@ const forgotPass = async (payload: { email: string}) => {
       subject: "Password reset code",
       html: resetEmailTemplate(data),
     });
-  } catch (error:any) {
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message );
+  } catch (error: any) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
   }
 };
 
-const checkIsValidForgetActivationCode = async (payload: {  email: string; code: string }) => {
+const checkIsValidForgetActivationCode = async (payload: { email: string; code: string }) => {
 
-  const account : any = await Auth.findOne({ email: payload.email }) as IAuth;
+  const account: any = await Auth.findOne({ email: payload.email }) as IAuth;
   if (!account) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Account does not exist!");
   }
@@ -287,7 +271,7 @@ const checkIsValidForgetActivationCode = async (payload: {  email: string; code:
   }
 
   const currentTime = new Date();
-  if (currentTime > account.verifyExpire ) {
+  if (currentTime > account.verifyExpire) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Reset code has expired!");
   }
   const update = await Auth.updateOne(
@@ -343,10 +327,16 @@ const changePassword = async (user: { authId: string }, payload: ChangePasswordP
     isUserExist.password &&
     !(await Auth.isPasswordMatched(oldPassword, isUserExist.password))
   ) {
-    throw new ApiError(402, "Old password is incorrect");
+    throw new ApiError(402, "password is incorrect");
   }
-  isUserExist.password = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
+  // isUserExist.password = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
+  // await isUserExist.save();
+
+  isUserExist.password = newPassword;
   await isUserExist.save();
+  console.log("User saved", isUserExist);
+
+  return { message: "Password changed successfully" };
 };
 
 const resendCodeActivationAccount = async (payload: { email: string }) => {
@@ -539,4 +529,4 @@ export const AuthService = {
   resendCodeActivationAccount,
   resendCodeForgotAccount,
 };
- 
+
