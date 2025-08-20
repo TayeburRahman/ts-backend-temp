@@ -1,9 +1,9 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
-import { IUser } from "./user.interface";
+import { ICustomers } from "./customers.interface";
 
- 
 
-const UserSchema = new Schema<IUser>(
+
+const CustomersSchema = new Schema<ICustomers>(
   {
     authId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,36 +26,12 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
-    isPhoneNumberVerified: {
-      type: Boolean,
-      default: false,
-    },
-    street: {
-      type: String,
-      default: null,
-    },
-    neighborhood: {
-      type: String,
-      default: null,
-    },
-    city: {
-      type: String,
-      default: null,
-    },
-    state: {
-      type: String,
-      default: null,
-    },
-    country: {
+    address: {
       type: String,
       default: null,
     },
     date_of_birth: {
       type: Date,
-    },
-    amount: {
-      type: Number,
-      default: 0,
     },
     status: {
       type: String,
@@ -68,6 +44,6 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
+const Customers: Model<ICustomers> = mongoose.model<ICustomers>("Customers", CustomersSchema);
 
-export default User;
+export default Customers;

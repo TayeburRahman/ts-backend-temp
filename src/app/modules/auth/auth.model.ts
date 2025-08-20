@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import config from '../../../config';
 import validator from 'validator';
 import { IAuth, IAuthModel } from './auth.interface';
- 
 
 const AuthSchema: Schema<IAuth> = new Schema(
   {
@@ -11,6 +10,7 @@ const AuthSchema: Schema<IAuth> = new Schema(
       type: String,
       required: true,
     },
+
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -27,8 +27,12 @@ const AuthSchema: Schema<IAuth> = new Schema(
     },
     role: {
       type: String,
-      enum: ["USER", "PARTNER", "ADMIN", "SUPER_ADMIN"],
+      enum: ["CUSTOMERS", "AGENT", "ADMIN", "SUPER_ADMIN"],
       required: true,
+    },
+    profile_image: {
+      type: String,
+      default: null,
     },
     verifyCode: {
       type: String,
@@ -61,6 +65,7 @@ const AuthSchema: Schema<IAuth> = new Schema(
   }
 );
 
+
 // Check if Auth exists
 AuthSchema.statics.isAuthExist = async function (email: string): Promise<IAuth | null> {
   return await this.findOne(
@@ -86,7 +91,7 @@ AuthSchema.statics.isPasswordMatched = async function (
 
 // Hash the password
 AuthSchema.pre<IAuth>('save', async function (next) {
-  
+
   if (!this.isModified('password')) {
     return next();
   }

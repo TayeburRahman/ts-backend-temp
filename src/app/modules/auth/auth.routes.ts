@@ -1,80 +1,55 @@
-import express, { Router } from 'express';
+import express from 'express';
 import auth from '../../middlewares/auth';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import { uploadFile } from '../../middlewares/fileUploader';
-import { AdminController } from '../admin/admin.controller';
-import { validateRequest } from '../../middlewares/validateRequest';
-import { AdminValidation } from '../admin/admin.validation';
-import { AuthValidation } from './auth.validation';
 import { AuthController } from './auth.controller';
-import { PartnerController } from '../partner/partner.controller';
-import { UserController } from '../user/user.controller';
+import { AuthValidation } from './auth.validation';
+import { validateRequest } from '../../middlewares/validateRequest';
+import { AdminController } from '../admin/admin.controller';
 
 const router = express.Router();
-//------ Auth Route -----------------
-router.post("/register", AuthController.registrationAccount)
-router.post("/login", AuthController.loginAccount)
+
+// --- Auth Routes ---
+router.post("/register", validateRequest(AuthValidation.create), AuthController.registrationAccount)
+router.post("/login", validateRequest(AuthValidation.loginZodSchema), AuthController.loginAccount)
 router.post("/activate-user", AuthController.activateAccount)
-router.post("/resend", AuthController.resendActivationCode)
 router.post("/active-resend", AuthController.resendCodeActivationAccount)
+router.post("/resend-forgot", AuthController.resendCodeForgotAccount)
 router.post("/forgot-password", AuthController.forgotPass)
-router.post("/forgot-resend", AuthController.resendCodeForgotAccount)
 router.post("/verify-otp", AuthController.checkIsValidForgetActivationCode)
 router.post("/reset-password", AuthController.resetPassword)
-router.patch("/change-password",
-  auth(
-    ENUM_USER_ROLE.USER,
-    // ENUM_USER_ROLE.PARTNER,
-    ENUM_USER_ROLE.SUPER_ADMIN
-  ), AuthController.changePassword
-);
-
-//------ User Router ---------------
-router.get("/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
 router.patch(
-  "/edit-profile",
-  auth(ENUM_USER_ROLE.USER),
-  uploadFile(),
-  PartnerController.updateProfile
-)
-router.delete(
-  "/delete-account",
-  auth(ENUM_USER_ROLE.USER),
-  PartnerController.deleteMyAccount
+  "/change-password",
+  auth(ENUM_USER_ROLE.AGENT, ENUM_USER_ROLE.CUSTOMERS, ENUM_USER_ROLE.ADMIN),
+  AuthController.changePassword
 );
 
-//------ Admin Router ---------------
 router.get(
   "/profile",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AdminController.myProfile
-)
-router.patch(
-  "/edit-profile",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  uploadFile(),
-  AdminController.updateProfile
-)
-router.delete(
-  "/delete_account",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AdminController.deleteMyAccount
+  auth(ENUM_USER_ROLE.CUSTOMERS, ENUM_USER_ROLE.ADMIN),
+  AuthController.getMyProfile
 );
 
-//------ Partner Route -----------------
-router.get("/profile", auth(ENUM_USER_ROLE.PARTNER), PartnerController.getProfile)
-router.patch(
-  "/edit-profile",
-  auth(ENUM_USER_ROLE.PARTNER),
-  uploadFile(),
-  PartnerController.updateProfile
-)
 router.delete(
   "/delete-account",
-  auth(ENUM_USER_ROLE.PARTNER),
-  PartnerController.deleteMyAccount
+  auth(ENUM_USER_ROLE.CUSTOMERS, ENUM_USER_ROLE.ADMIN),
+  AuthController.deleteMyAccount
 );
 
+router.patch(
+  "/edit-profile",
+  auth(ENUM_USER_ROLE.CUSTOMERS, ENUM_USER_ROLE.ADMIN),
+  uploadFile(),
+  validateRequest(AuthValidation.updateUserZodSchema),
+  AuthController.updateMyProfile
+);
+// ========== ADMIN ACCESS BLOCK ACCOUNT ========== 
+router.patch(
+  "/block-unblock",
+  auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
+  validateRequest(AuthValidation.blockUnblockUserZodSchema),
+  AdminController.blockUnblockAuthUser
+);
 
 
 export const AuthRoutes = router;

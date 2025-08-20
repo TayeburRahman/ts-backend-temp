@@ -1,9 +1,5 @@
-export type IPaginationOptions = {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-};
+import { SortOrder } from 'mongoose';
+
 export type IGenericResponse<T> = {
   meta: {
     page: number;
@@ -12,10 +8,6 @@ export type IGenericResponse<T> = {
   };
   data: T;
 };
-export type IAcademicSemesterFilters = {
-  searchTerm?: string;
-};
-import { SortOrder } from 'mongoose';
 
 export type IOptions = {
   page?: number;

@@ -18,7 +18,6 @@ export type IRegistration = {
   role?: string;
 };
 export type IActivationToken = {
-  //i will do it , but what? its hello world.
   token: string;
   activationCode: string;
 };
@@ -40,7 +39,7 @@ export type IAuth = Document & {
   name: string;
   email: string;
   password: string;
-  role: 'USER' | 'PARTNER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'CUSTOMERS' | 'AGENT' | 'ADMIN' | 'SUPER_ADMIN';
   verifyCode?: string;
   codeVerify?: boolean;
   activationCode?: string;
@@ -49,6 +48,7 @@ export type IAuth = Document & {
   is_block?: boolean;
   isActive?: boolean;
   confirmPassword: string;
+  profile_image: string | null;
   [key: string]: any;
 };
 

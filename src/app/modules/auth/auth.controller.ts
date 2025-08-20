@@ -1,5 +1,5 @@
- 
-import { Request, RequestHandler, Response } from 'express';  
+
+import { Request, Response } from 'express';
 import catchAsync from '../../../shared/catchasync';
 import { AuthService } from './auth.service';
 import sendResponse from '../../../shared/sendResponse';
@@ -7,17 +7,12 @@ import config from '../../../config';
 import { IReqUser } from './auth.interface';
 
 const registrationAccount = catchAsync(async (req: Request, res: Response) => {
-  const { role } = await AuthService.registrationAccount(req.body);
-  const message =
-    role === "USER"
-      ? "Please check your email for the activation OTP code."
-      : "Your account is awaiting admin approval.";
+  const { message } = await AuthService.registrationAccount(req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message,
-    data: role,
+    message: message
   });
 });
 
@@ -108,17 +103,6 @@ const resendCodeForgotAccount = catchAsync(async (req: Request, res: Response) =
   });
 });
 
-const resendActivationCode = catchAsync(async (req: Request, res: Response) => {
-  // const data = req.body;
-  // const result = await AuthService.resendActivationCode(data);
-  // sendResponse(res, {
-  //   statusCode: 200,
-  //   success: true,
-  //   message: "Resent successfully",
-  //   data: result,
-  // });
-});
-
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   await AuthService.resetPassword(req as any);
   sendResponse(res, {
@@ -128,6 +112,39 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.myProfile(req.user as IReqUser);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User retrieved successfully",
+    data: result,
+  });
+});
+
+const deleteMyAccount = catchAsync(async (req: Request, res: Response) => {
+  const authId = (req.user as IReqUser).authId;
+  await AuthService.deleteMyAccount(authId as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Account delete successfully.",
+  });
+});
+
+const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.updateMyProfile(req as any);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Locations upload successfully.",
+    data: result,
+  });
+});
+
+
+
 export const AuthController = {
   registrationAccount,
   activateAccount,
@@ -135,9 +152,10 @@ export const AuthController = {
   changePassword,
   forgotPass,
   resetPassword,
-  resendActivationCode,
   checkIsValidForgetActivationCode,
   resendCodeActivationAccount,
   resendCodeForgotAccount,
+  getMyProfile,
+  deleteMyAccount,
+  updateMyProfile
 };
- 
