@@ -17,6 +17,8 @@ const blockUnblockAuthUser = async (payload: BlockUnblockPayload) => {
     { new: true, runValidators: true }
   ).select("role name email is_block");
 
+  console.log("Updated Auth:", updatedAuth);
+
   if (!updatedAuth) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
